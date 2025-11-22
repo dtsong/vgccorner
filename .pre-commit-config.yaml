@@ -9,14 +9,10 @@ repos:
       - id: check-json
       - id: check-added-large-files
 
-  # 2) Go + Terraform hooks (Gruntwork collection)
+  # 2) Terraform hooks (Gruntwork collection)
   - repo: https://github.com/gruntwork-io/pre-commit
     rev: v0.1.30  # latest tagged release
     hooks:
-      # Go static analysis (requires golangci-lint installed)
-      - id: golangci-lint
-        files: ^backend/.*\.go$
-
       # Terraform formatting & validation
       - id: terraform-fmt
         files: ^infra/terraform/.*\.tf$
@@ -27,9 +23,20 @@ repos:
       - id: tflint
         files: ^infra/terraform/.*\.tf$
 
-  # 3) Local hooks for the Next.js frontend
+  # 3) Local hooks for Go, Next.js, etc.
   - repo: local
     hooks:
+      - id: golangci-lint
+        name: golangci-lint (Go static analysis)
+        entry: bash
+        language: system
+        files: ^backend/.*\.go$
+        pass_filenames: false
+        args:
+          - -c
+          - |
+            cd backend && golangci-lint run ./...
+
       - id: frontend-lint
         name: frontend lint (Next.js)
         entry: bash

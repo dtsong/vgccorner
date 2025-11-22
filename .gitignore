@@ -13,6 +13,7 @@ vendor/
 *.swp
 *.swo
 *~
+backend/battleforge-api
 
 # Go mod
 go.sum
