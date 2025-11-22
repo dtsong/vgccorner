@@ -58,6 +58,18 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/*.tfvars
+**/*.tfvars.json
+
+# But allow example files
+!**/terraform.tfvars.example
+!**/*.tfvars.example
+
 # Logs
 logs/
 *.log

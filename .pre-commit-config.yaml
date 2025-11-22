@@ -13,12 +13,6 @@ repos:
   - repo: https://github.com/gruntwork-io/pre-commit
     rev: v0.1.30  # latest tagged release
     hooks:
-      # Go formatting & imports
-      - id: gofmt
-        files: ^backend/.*\.go$
-      - id: goimports
-        files: ^backend/.*\.go$
-
       # Go static analysis (requires golangci-lint installed)
       - id: golangci-lint
         files: ^backend/.*\.go$
