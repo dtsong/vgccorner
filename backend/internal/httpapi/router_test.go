@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/dtsong/battleforge/backend/internal/observability"
+	"github.com/dtsong/vgccorner/backend/internal/observability"
 )
 
 func TestHealthCheck(t *testing.T) {

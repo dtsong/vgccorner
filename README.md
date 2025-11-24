@@ -1,6 +1,6 @@
-# BattleForge
+# VGCCorner
 
-BattleForge is a full-stack platform for analyzing competitive Pokémon gameplay.
+VGCCorner is a full-stack platform for analyzing competitive Pokémon gameplay.
 
 ## Overview
 
@@ -35,7 +35,7 @@ The goal is to act as a **replay/intel layer** that can power player coaching, p
 
 - Terraform
 - Google Cloud Platform
-- Cloud Run for the BattleForge API service (planned)
+- Cloud Run for the VGCCorner API service (planned)
 - Remote state in GCS (per environment)
 
 ### Tooling
@@ -48,10 +48,10 @@ The goal is to act as a **replay/intel layer** that can power player coaching, p
 ## Repository Layout
 
 ```text
-battleforge/
+vgccorner/
   backend/                # Go API + analysis engine
     cmd/
-      battleforge-api/    # main HTTP server
+      vgccorner-api/      # main HTTP server
         main.go
     internal/
       httpapi/            # routing + HTTP handlers
@@ -123,7 +123,7 @@ From repo root:
 ```bash
 cd backend
 go test ./...
-go run ./cmd/battleforge-api
+go run ./cmd/vgccorner-api
 ```
 
 By default the API listens on http://localhost:8080.
@@ -187,7 +187,7 @@ The Terraform configuration under infra/terraform/envs/dev is intended to:
 
 - Configure the Google provider
 - Store state in a GCS bucket
-- Deploy the battleforge-api Docker image to Cloud Run via the cloud_run_service module
+- Deploy the vgccorner-api Docker image to Cloud Run via the cloud_run_service module
 
 Basic flow (once you've created a dev project and GCS bucket):
 
@@ -196,7 +196,7 @@ cd infra/terraform/envs/dev
 
 # set env vars or use a tfvars file:
 export TF_VAR_project_id="your-gcp-project-id"
-export TF_VAR_battleforge_api_image="gcr.io/your-project/battleforge-api:latest"
+export TF_VAR_vgccorner_api_image="gcr.io/your-project/vgccorner-api:latest"
 
 terraform init
 terraform plan
@@ -218,4 +218,4 @@ Future enhancements:
 - Build Showdown dashboard: summary card, damage chart, turn timeline, key moments
 - Add AI coaching layer over BattleSummary
 - Implement TCG Live export parser + analysis
-- Wire Terraform module to deploy battleforge-api to Cloud Run
+- Wire Terraform module to deploy vgccorner-api to Cloud Run

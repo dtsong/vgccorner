@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/dtsong/battleforge/backend/internal/analysis"
-	"github.com/dtsong/battleforge/backend/internal/db"
+	"github.com/dtsong/vgccorner/backend/internal/analysis"
+	"github.com/dtsong/vgccorner/backend/internal/db"
 )
 // It supports three analysis types via discriminator: replayId, username, or rawLog.
 type AnalyzeShowdownRequest struct {

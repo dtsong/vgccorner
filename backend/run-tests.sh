@@ -1,5 +1,5 @@
 #!/bin/bash
-# Quick test runner script for BattleForge backend
+# Quick test runner script for VGCCorner backend
 # Usage: ./run-tests.sh [command]
 # Commands: test, test-v, coverage, coverage-html, clean
 
@@ -7,7 +7,7 @@ set -e
 
 cd "$(dirname "$0")" || exit 1
 
-echo "🧪 BattleForge Backend Test Runner"
+echo "🧪 VGCCorner Backend Test Runner"
 echo "=================================="
 echo ""
 

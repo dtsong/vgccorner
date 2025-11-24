@@ -1,4 +1,4 @@
-module github.com/dtsong/battleforge/backend
+module github.com/dtsong/vgccorner/backend
 
 go 1.25.4
 

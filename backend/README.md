@@ -1,4 +1,4 @@
-# BattleForge Backend API
+# VGCCorner Backend API
 
 Go-based HTTP API for analyzing competitive Pokémon gameplay with support for Pokémon Showdown replays.
 
@@ -7,7 +7,7 @@ Go-based HTTP API for analyzing competitive Pokémon gameplay with support for P
 ```
 backend/
 ├── cmd/
-│   └── battleforge-api/
+│   └── vgccorner-api/
 │       └── main.go                 # Application entry point
 ├── internal/
 │   ├── analysis/
@@ -48,26 +48,26 @@ backend/
 2. **Set up the database:**
    ```bash
    # Create PostgreSQL database
-   createdb battleforge
+   createdb vgccorner
 
    # Run migrations
-   psql battleforge < migrations/001_initial_schema.sql
+   psql vgccorner < migrations/001_initial_schema.sql
    ```
 
 3. **Build the application:**
    ```bash
-   go build -o battleforge-api ./cmd/battleforge-api
+   go build -o vgccorner-api ./cmd/vgccorner-api
    ```
 
 ### Running Locally
 
 ```bash
 # Set environment variables (optional)
-export BATTLEFORGE_API_ADDR=:8080
-export DATABASE_URL="postgres://user:password@localhost:5432/battleforge?sslmode=disable"
+export VGCCORNER_API_ADDR=:8080
+export DATABASE_URL="postgres://user:password@localhost:5432/vgccorner?sslmode=disable"
 
 # Run the server
-go run ./cmd/battleforge-api
+go run ./cmd/vgccorner-api
 ```
 
 The API will be available at `http://localhost:8080`

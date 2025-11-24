@@ -2,7 +2,7 @@
 
 ## Overview
 
-Comprehensive unit test suite for the BattleForge backend with **25+ test cases** covering all major components, edge cases, and error scenarios.
+Comprehensive unit test suite for the VGCCorner backend with **25+ test cases** covering all major components, edge cases, and error scenarios.
 
 ## Test Files Created
 

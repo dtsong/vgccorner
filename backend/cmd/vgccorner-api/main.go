@@ -5,8 +5,8 @@ import (
 	"os"
 
 	_ "github.com/lib/pq"
-	"github.com/dtsong/battleforge/backend/internal/httpapi"
-	"github.com/dtsong/battleforge/backend/internal/observability"
+	"github.com/dtsong/vgccorner/backend/internal/httpapi"
+	"github.com/dtsong/vgccorner/backend/internal/observability"
 )
 
 func main() {

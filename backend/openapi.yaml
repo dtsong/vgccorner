@@ -1,17 +1,17 @@
 openapi: 3.1.0
 info:
-  title: BattleForge API
+  title: VGCCorner API
   description: Full-stack platform for analyzing competitive Pokémon gameplay. Supports Pokémon Showdown replays and TCG Live game exports.
   version: 1.0.0
   contact:
-    name: BattleForge Team
+    name: VGCCorner Team
   license:
     name: MIT
 
 servers:
   - url: http://localhost:8080
     description: Local development server
-  - url: https://api.battleforge.dev
+  - url: https://api.vgccorner.dev
     description: Production server (planned)
 
 paths:

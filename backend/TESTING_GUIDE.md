@@ -1,8 +1,8 @@
-# BattleForge Backend - Complete Testing Guide
+# VGCCorner Backend - Complete Testing Guide
 
 ## What Was Created
 
-A comprehensive unit test suite for the BattleForge backend API with **50+ test cases** covering all major components, edge cases, and error scenarios.
+A comprehensive unit test suite for the VGCCorner backend API with **50+ test cases** covering all major components, edge cases, and error scenarios.
 
 ## Files Created
 
