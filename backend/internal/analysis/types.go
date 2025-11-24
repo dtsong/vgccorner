@@ -27,25 +27,30 @@ type BattleSummary struct {
 
 // Player represents a single player in the battle.
 type Player struct {
-	Name      string     `json:"name"`
-	Team      []Pokémon  `json:"team"`
-	Active    *Pokémon   `json:"active"` // Currently active Pokémon
-	Losses    int        `json:"losses"` // Number of fainted Pokémon
-	TotalLeft int        `json:"totalLeft"` // Total Pokémon still in battle
+	Name         string     `json:"name"`
+	Team         []Pokémon  `json:"team"`
+	Active       *Pokémon   `json:"active"` // Currently active Pokémon
+	Losses       int        `json:"losses"` // Number of fainted Pokémon
+	TotalLeft    int        `json:"totalLeft"` // Total Pokémon still in battle
+	ActiveIndex  int        `json:"activeIndex"` // Index in team of active Pokémon
 }
 
 // Pokémon represents a single Pokémon with its stats and moves.
 type Pokémon struct {
-	ID       string `json:"id"`       // e.g., "pikachu"
-	Name     string `json:"name"`
-	Level    int    `json:"level"`
-	Gender   string `json:"gender"`   // "M", "F", or ""
-	Ability  string `json:"ability"`
-	Item     string `json:"item"`
-	Stats    Stats  `json:"stats"`    // Base stats
-	Moves    []Move `json:"moves"`
-	Happiness int   `json:"happiness"` // 0-255
-	Shiny    bool   `json:"shiny"`
+	ID        string `json:"id"`       // e.g., "pikachu"
+	Name      string `json:"name"`
+	Level     int    `json:"level"`
+	Gender    string `json:"gender"`   // "M", "F", or ""
+	Ability   string `json:"ability"`
+	Item      string `json:"item"`
+	Stats     Stats  `json:"stats"`    // Base stats
+	Moves     []Move `json:"moves"`
+	Happiness int    `json:"happiness"` // 0-255
+	Shiny     bool   `json:"shiny"`
+	CurrentHP int    `json:"currentHP"`  // Current HP in battle
+	MaxHP     int    `json:"maxHP"`      // Maximum HP
+	Status    string `json:"status"`     // "burn", "freeze", "paralysis", "poison", "sleep", or ""
+	TeraType  string `json:"teraType"`   // Terastallization type if terastallized
 }
 
 // Move represents a move a Pokémon knows.
@@ -75,6 +80,14 @@ type Turn struct {
 	StateAfter    BattleState      `json:"stateAfter"`
 	DamageDealt   map[string]int   `json:"damageDealt"`   // Player name -> damage dealt
 	HealingDone   map[string]int   `json:"healingDone"`   // Player name -> healing done
+	PositionScore *PositionScore   `json:"positionScore"` // Evaluation of positions after this turn
+}
+
+// PositionScore represents the evaluated position for both players after a turn.
+type PositionScore struct {
+	Player1Score float64 `json:"player1Score"` // 0-100 scale
+	Player2Score float64 `json:"player2Score"` // 0-100 scale
+	MomentumPlayer string `json:"momentumPlayer"` // "player1", "player2", or "neutral"
 }
 
 // Action represents an action taken by a player during a turn.
@@ -107,6 +120,19 @@ type BattleStats struct {
 	AvgHealPerTurn    float64            `json:"avgHealPerTurn"`
 	Player1Stats      PlayerStats        `json:"player1Stats"`
 	Player2Stats      PlayerStats        `json:"player2Stats"`
+	TurningPoints     []TurningPoint     `json:"turningPoints"`     // Key moments where momentum shifted
+}
+
+// TurningPoint represents a turn where the battle's momentum shifted significantly.
+type TurningPoint struct {
+	TurnNumber int     `json:"turnNumber"`
+	Score1Before float64 `json:"score1Before"` // Player1's score before this turn
+	Score1After  float64 `json:"score1After"`  // Player1's score after this turn
+	Score2Before float64 `json:"score2Before"`
+	Score2After  float64 `json:"score2After"`
+	MomentumShift float64 `json:"momentumShift"` // Negative means P2 gained, positive means P1 gained
+	Significance  int     `json:"significance"` // 1-10 scale
+	Description   string  `json:"description"`
 }
 
 // PlayerStats represents stats for an individual player.

@@ -31,6 +31,7 @@ export interface Player {
   active: Pokémon | null; // Currently active Pokémon
   losses: number; // Number of fainted Pokémon
   totalLeft: number; // Total Pokémon still in battle
+  activeIndex: number; // Index in team of active Pokémon
 }
 
 export interface Pokémon {
@@ -44,6 +45,10 @@ export interface Pokémon {
   moves: Move[];
   happiness: number; // 0-255
   shiny: boolean;
+  currentHP: number; // Current HP in battle
+  maxHP: number; // Maximum HP
+  status: string; // "burn", "freeze", "paralysis", "poison", "sleep", or ""
+  teraType: string; // Terastallization type if terastallized
 }
 
 export interface Move {
@@ -70,6 +75,13 @@ export interface Turn {
   stateAfter: BattleState;
   damageDealt: Record<string, number>; // Player name -> damage dealt
   healingDone: Record<string, number>; // Player name -> healing done
+  positionScore: PositionScore | null; // Evaluation of positions after this turn
+}
+
+export interface PositionScore {
+  player1Score: number; // 0-100 scale
+  player2Score: number; // 0-100 scale
+  momentumPlayer: "player1" | "player2" | "neutral"; // Which player has momentum
 }
 
 export interface Action {
@@ -99,6 +111,18 @@ export interface BattleStats {
   avgHealPerTurn: number;
   player1Stats: PlayerStats;
   player2Stats: PlayerStats;
+  turningPoints: TurningPoint[]; // Key moments where momentum shifted
+}
+
+export interface TurningPoint {
+  turnNumber: number;
+  score1Before: number; // Player1's score before this turn
+  score1After: number; // Player1's score after this turn
+  score2Before: number;
+  score2After: number;
+  momentumShift: number; // Negative means P2 gained, positive means P1 gained
+  significance: number; // 1-10 scale
+  description: string;
 }
 
 export interface PlayerStats {
@@ -121,6 +145,6 @@ export interface EffectivenessStats {
 export interface KeyMoment {
   turnNumber: number;
   description: string; // e.g., "Player 2 switched to Charizard"
-  type: "switch" | "ko" | "status" | "weather" | "other";
+  type: "switch" | "ko" | "status" | "weather" | "turning_point" | "other";
   significance: number; // 1-10 scale
 }
