@@ -31,9 +31,7 @@ CREATE TABLE IF NOT EXISTS battles (
     battle_log TEXT,
     is_private BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_battles_format (format),
-    INDEX idx_battles_timestamp (timestamp)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Pokémon instances (specific Pokémon in a battle)
@@ -54,8 +52,7 @@ CREATE TABLE IF NOT EXISTS pokemon (
     speed_base INT,
     shiny BOOLEAN DEFAULT FALSE,
     happiness INT DEFAULT 255,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_pokemon_battle (battle_id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Moves reference table (static data)
@@ -77,8 +74,7 @@ CREATE TABLE IF NOT EXISTS pokemon_moves (
     pokemon_id UUID NOT NULL REFERENCES pokemon(id) ON DELETE CASCADE,
     move_id INT NOT NULL REFERENCES moves(id),
     slot INT NOT NULL,
-    UNIQUE(pokemon_id, slot),
-    INDEX idx_pokemon_moves_pokemon (pokemon_id)
+    UNIQUE(pokemon_id, slot)
 );
 
 -- Items reference table (static data)
@@ -97,8 +93,7 @@ CREATE TABLE IF NOT EXISTS battle_turns (
     battle_id UUID NOT NULL REFERENCES battles(id) ON DELETE CASCADE,
     turn_number INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(battle_id, turn_number),
-    INDEX idx_battle_turns_battle (battle_id)
+    UNIQUE(battle_id, turn_number)
 );
 
 -- Battle actions (moves, switches, items)
@@ -111,8 +106,7 @@ CREATE TABLE IF NOT EXISTS battle_actions (
     pokemon_id UUID REFERENCES pokemon(id),
     item_id INT REFERENCES items(id),
     switch_to_pokemon_id UUID REFERENCES pokemon(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_battle_actions_turn (battle_turn_id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Battle analysis results
@@ -144,11 +138,17 @@ CREATE TABLE IF NOT EXISTS key_moments (
     moment_type VARCHAR(50) NOT NULL,
     description TEXT NOT NULL,
     significance INT DEFAULT 5,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_key_moments_battle (battle_id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create indexes for common queries
+CREATE INDEX IF NOT EXISTS idx_battles_format ON battles(format);
+CREATE INDEX IF NOT EXISTS idx_battles_timestamp ON battles(timestamp);
 CREATE INDEX IF NOT EXISTS idx_battles_player1 ON battles(player1_id);
 CREATE INDEX IF NOT EXISTS idx_battles_player2 ON battles(player2_id);
 CREATE INDEX IF NOT EXISTS idx_battles_is_private ON battles(is_private);
+CREATE INDEX IF NOT EXISTS idx_pokemon_battle ON pokemon(battle_id);
+CREATE INDEX IF NOT EXISTS idx_pokemon_moves_pokemon ON pokemon_moves(pokemon_id);
+CREATE INDEX IF NOT EXISTS idx_battle_turns_battle ON battle_turns(battle_id);
+CREATE INDEX IF NOT EXISTS idx_battle_actions_turn ON battle_actions(battle_turn_id);
+CREATE INDEX IF NOT EXISTS idx_key_moments_battle ON key_moments(battle_id);
