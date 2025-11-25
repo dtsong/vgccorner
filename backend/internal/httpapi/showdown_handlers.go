@@ -6,10 +6,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/dtsong/vgccorner/backend/internal/analysis"
 	"github.com/dtsong/vgccorner/backend/internal/db"
+	"github.com/go-chi/chi/v5"
 )
+
 // It supports three analysis types via discriminator: replayId, username, or rawLog.
 type AnalyzeShowdownRequest struct {
 	// Discriminator field
@@ -35,14 +36,14 @@ type AnalyzeResponse struct {
 	Status   string                  `json:"status"`
 	BattleID string                  `json:"battleId,omitempty"`
 	Data     *analysis.BattleSummary `json:"data,omitempty"`
-	Metadata *ResponseMetadata        `json:"metadata,omitempty"`
+	Metadata *ResponseMetadata       `json:"metadata,omitempty"`
 }
 
 // ResponseMetadata contains metadata about the analysis.
 type ResponseMetadata struct {
-	ParseTimeMs   int  `json:"parseTimeMs"`
-	AnalysisTimeMs int `json:"analysisTimeMs"`
-	Cached        bool `json:"cached"`
+	ParseTimeMs    int  `json:"parseTimeMs"`
+	AnalysisTimeMs int  `json:"analysisTimeMs"`
+	Cached         bool `json:"cached"`
 }
 
 // ErrorResponse is the response for errors.
@@ -60,7 +61,6 @@ type ListReplaysRequest struct {
 	Limit     int
 	Offset    int
 }
-
 
 // handleAnalyzeShowdown handles POST /api/showdown/analyze requests.
 func (s *Server) handleAnalyzeShowdown(w http.ResponseWriter, r *http.Request) {

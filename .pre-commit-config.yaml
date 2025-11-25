@@ -1,7 +1,7 @@
 repos:
   # 1) Generic repo-wide hygiene
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0  # or latest; run `pre-commit autoupdate` periodically :contentReference[oaicite:2]{index=2}
+    rev: v6.0.0  # or latest; run `pre-commit autoupdate` periodically :contentReference[oaicite:2]{index=2}
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -26,6 +26,46 @@ repos:
   # 3) Local hooks for Go, Next.js, etc.
   - repo: local
     hooks:
+      - id: go-fmt
+        name: go fmt
+        entry: bash
+        language: system
+        files: ^backend/.*\.go$
+        pass_filenames: false
+        args:
+          - -c
+          - |
+            cd backend && gofmt -l -w .
+      - id: go-vet
+        name: go vet
+        entry: bash
+        language: system
+        files: ^backend/.*\.go$
+        pass_filenames: false
+        args:
+          - -c
+          - |
+            cd backend && go vet ./...
+      - id: go-imports
+        name: go imports
+        entry: bash
+        language: system
+        files: ^backend/.*\.go$
+        pass_filenames: false
+        args:
+          - -c
+          - |
+            cd backend && ~/go/bin/goimports -l -w .
+      - id: go-mod-tidy
+        name: go mod tidy
+        entry: bash
+        language: system
+        files: ^backend/go.mod$
+        pass_filenames: false
+        args:
+          - -c
+          - |
+            cd backend && go mod tidy -v
       - id: golangci-lint
         name: golangci-lint (Go static analysis)
         entry: bash
@@ -36,6 +76,28 @@ repos:
           - -c
           - |
             cd backend && golangci-lint run ./...
+
+      - id: go-build
+        name: go build (verify backend builds)
+        entry: bash
+        language: system
+        files: ^backend/.*\.go$
+        pass_filenames: false
+        args:
+          - -c
+          - |
+            cd backend && go build -o /tmp/vgccorner-api ./cmd/vgccorner-api
+
+      - id: go-unit-tests
+        name: go unit tests
+        entry: bash
+        language: system
+        files: ^backend/.*\.go$
+        pass_filenames: false
+        args:
+          - -c
+          - |
+            cd backend && go test -short -timeout 30s ./...
 
       - id: frontend-lint
         name: frontend lint (Next.js)
@@ -56,13 +118,3 @@ repos:
           - -c
           - |
             cd frontend && npm run typecheck
-
-      - id: backend-test
-        name: backend go test ./...
-        entry: bash
-        language: system
-        pass_filenames: false
-        args:
-          - -c
-          - |
-            cd backend && go test ./...

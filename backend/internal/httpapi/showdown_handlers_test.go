@@ -400,7 +400,7 @@ func TestAnalyzeShowdownEdgeCases(t *testing.T) {
 			name: "request with special characters in log",
 			request: AnalyzeShowdownRequest{
 				AnalysisType: "rawLog",
-				RawLog:       `|j|☆TestPlayer™
+				RawLog: `|j|☆TestPlayer™
 |j|☆OtherPlayer
 |start
 |win|TestPlayer™`,

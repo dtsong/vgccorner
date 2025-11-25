@@ -224,8 +224,8 @@ type StateTracker struct {
 	teams              map[string][]Pokémon
 	activePokemon      map[string]*Pokémon // Current active mon for each player
 	activePokemonIndex map[string]int
-	losses             map[string]int // Fainted pokemon count
-	fieldEffects       map[string][]string // Side effects like Tailwind
+	losses             map[string]int            // Fainted pokemon count
+	fieldEffects       map[string][]string       // Side effects like Tailwind
 	statBoosts         map[string]map[string]int // Player->stat->boost level
 }
 
@@ -536,14 +536,14 @@ func detectTurningPoints(summary *BattleSummary) {
 			}
 
 			tp := TurningPoint{
-				TurnNumber:   curr.TurnNumber,
-				Score1Before: prev.PositionScore.Player1Score,
-				Score1After:  curr.PositionScore.Player1Score,
-				Score2Before: prev.PositionScore.Player2Score,
-				Score2After:  curr.PositionScore.Player2Score,
+				TurnNumber:    curr.TurnNumber,
+				Score1Before:  prev.PositionScore.Player1Score,
+				Score1After:   curr.PositionScore.Player1Score,
+				Score2Before:  prev.PositionScore.Player2Score,
+				Score2After:   curr.PositionScore.Player2Score,
 				MomentumShift: momentumShift,
-				Significance: significance,
-				Description: fmt.Sprintf("%s gained significant momentum this turn", direction),
+				Significance:  significance,
+				Description:   fmt.Sprintf("%s gained significant momentum this turn", direction),
 			}
 
 			turningPoints = append(turningPoints, tp)

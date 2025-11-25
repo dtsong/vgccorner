@@ -93,10 +93,10 @@ func TestHTTPMethodsNotAllowed(t *testing.T) {
 		method string
 		path   string
 	}{
-		{"GET", "/api/showdown/analyze"},      // POST only
-		{"PUT", "/api/showdown/analyze"},      // POST only
-		{"DELETE", "/api/showdown/analyze"},   // POST only
-		{"PUT", "/api/showdown/replays/123"},  // GET only
+		{"GET", "/api/showdown/analyze"},     // POST only
+		{"PUT", "/api/showdown/analyze"},     // POST only
+		{"DELETE", "/api/showdown/analyze"},  // POST only
+		{"PUT", "/api/showdown/replays/123"}, // GET only
 	}
 
 	for _, tt := range tests {

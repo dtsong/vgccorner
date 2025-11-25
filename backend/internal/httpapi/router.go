@@ -3,8 +3,8 @@ package httpapi
 import (
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/dtsong/vgccorner/backend/internal/observability"
+	"github.com/go-chi/chi/v5"
 )
 
 type Server struct {

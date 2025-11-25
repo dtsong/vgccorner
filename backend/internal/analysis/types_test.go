@@ -176,10 +176,10 @@ func TestTurnStructure(t *testing.T) {
 
 func TestPositionScore(t *testing.T) {
 	tests := []struct {
-		name         string
-		p1Score      float64
-		p2Score      float64
-		expectValid  bool
+		name        string
+		p1Score     float64
+		p2Score     float64
+		expectValid bool
 	}{
 		{
 			name:        "valid scores",
@@ -228,14 +228,14 @@ func TestPositionScore(t *testing.T) {
 
 func TestTurningPoint(t *testing.T) {
 	tp := &TurningPoint{
-		TurnNumber:   5,
-		Score1Before: 45.0,
-		Score1After:  65.0,
-		Score2Before: 55.0,
-		Score2After:  35.0,
+		TurnNumber:    5,
+		Score1Before:  45.0,
+		Score1After:   65.0,
+		Score2Before:  55.0,
+		Score2After:   35.0,
 		MomentumShift: 20.0,
-		Significance: 8,
-		Description:  "Player 1 ko'd player 2's lead",
+		Significance:  8,
+		Description:   "Player 1 ko'd player 2's lead",
 	}
 
 	if tp.TurnNumber <= 0 {
@@ -267,9 +267,9 @@ func TestBattleStats(t *testing.T) {
 		AvgDamagePerTurn: 25.5,
 		AvgHealPerTurn:   5.0,
 		MoveFrequency: map[string]int{
-			"thunderbolt": 3,
+			"thunderbolt":  3,
 			"flamethrower": 2,
-			"protect":     2,
+			"protect":      2,
 		},
 		TypeCoverage: map[string]int{
 			"electric": 4,
@@ -348,9 +348,9 @@ func TestPlayerStats(t *testing.T) {
 
 func TestKeyMoment(t *testing.T) {
 	moment := &KeyMoment{
-		TurnNumber:  3,
-		Type:        "KO",
-		Description: "Player 2's Pikachu was knocked out",
+		TurnNumber:   3,
+		Type:         "KO",
+		Description:  "Player 2's Pikachu was knocked out",
 		Significance: 9,
 	}
 
@@ -371,12 +371,12 @@ func TestKeyMoment(t *testing.T) {
 	}
 
 	validTypes := map[string]bool{
-		"KO":       true,
-		"switch":   true,
-		"status":   true,
-		"weather":  true,
-		"crit":     true,
-		"other":    true,
+		"KO":      true,
+		"switch":  true,
+		"status":  true,
+		"weather": true,
+		"crit":    true,
+		"other":   true,
 	}
 
 	if !validTypes[moment.Type] {
