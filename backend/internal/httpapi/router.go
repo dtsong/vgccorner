@@ -3,17 +3,18 @@ package httpapi
 import (
 	"net/http"
 
+	"github.com/dtsong/vgccorner/backend/internal/db"
 	"github.com/dtsong/vgccorner/backend/internal/observability"
 	"github.com/go-chi/chi/v5"
 )
 
 type Server struct {
 	logger *observability.Logger
-	// db     *db.Database // Will be added when DB integration is complete
+	db     *db.Database
 }
 
-func NewRouter(logger *observability.Logger) http.Handler {
-	s := &Server{logger: logger}
+func NewRouter(logger *observability.Logger, database *db.Database) http.Handler {
+	s := &Server{logger: logger, db: database}
 
 	r := chi.NewRouter()
 
@@ -24,6 +25,7 @@ func NewRouter(logger *observability.Logger) http.Handler {
 	r.Post("/api/showdown/analyze", s.handleAnalyzeShowdown)
 	r.Get("/api/showdown/replays", s.handleListShowdownReplays)
 	r.Get("/api/showdown/replays/{replayId}", s.handleGetShowdownReplay)
+	r.Get("/api/showdown/replays/{replayId}/turns", s.handleGetTurnAnalysis)
 
 	// TCG Live endpoint (planned)
 	r.Post("/api/tcglive/analyze", s.handleAnalyzeTCGLive)

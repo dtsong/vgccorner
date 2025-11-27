@@ -10,7 +10,7 @@ import (
 
 func TestHealthCheck(t *testing.T) {
 	logger := observability.NewLogger()
-	router := NewRouter(logger)
+	router := NewRouter(logger, nil)
 
 	tests := []struct {
 		name           string
@@ -54,7 +54,7 @@ func TestHealthCheck(t *testing.T) {
 
 func TestRouterEndpointsExist(t *testing.T) {
 	logger := observability.NewLogger()
-	router := NewRouter(logger)
+	router := NewRouter(logger, nil)
 
 	// These tests just verify the routes are registered and return a response
 	tests := []struct {
@@ -62,16 +62,20 @@ func TestRouterEndpointsExist(t *testing.T) {
 		method        string
 		path          string
 		allowNotFound bool // for handlers that return 404 when resource doesn't exist
+		skip          bool // skip test if nil database
 	}{
-		{"healthz GET", "GET", "/healthz", false},
-		{"showdown analyze POST", "POST", "/api/showdown/analyze", false},
-		{"showdown list GET", "GET", "/api/showdown/replays", false},
-		{"showdown get GET", "GET", "/api/showdown/replays/test-id", true},
-		{"tcglive analyze POST", "POST", "/api/tcglive/analyze", false},
+		{"healthz GET", "GET", "/healthz", false, false},
+		{"showdown analyze POST", "POST", "/api/showdown/analyze", false, false},
+		{"showdown list GET", "GET", "/api/showdown/replays", false, true},       // Requires DB
+		{"showdown get GET", "GET", "/api/showdown/replays/test-id", true, true}, // Requires DB
+		{"tcglive analyze POST", "POST", "/api/tcglive/analyze", false, false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.skip {
+				t.Skip("test requires database")
+			}
 			req := httptest.NewRequest(tt.method, tt.path, nil)
 			w := httptest.NewRecorder()
 
@@ -87,7 +91,7 @@ func TestRouterEndpointsExist(t *testing.T) {
 
 func TestHTTPMethodsNotAllowed(t *testing.T) {
 	logger := observability.NewLogger()
-	router := NewRouter(logger)
+	router := NewRouter(logger, nil)
 
 	tests := []struct {
 		method string
@@ -115,7 +119,7 @@ func TestHTTPMethodsNotAllowed(t *testing.T) {
 
 func TestRouterResponseHeaders(t *testing.T) {
 	logger := observability.NewLogger()
-	router := NewRouter(logger)
+	router := NewRouter(logger, nil)
 
 	req := httptest.NewRequest("GET", "/healthz", nil)
 	w := httptest.NewRecorder()

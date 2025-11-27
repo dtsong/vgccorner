@@ -116,6 +116,75 @@ export async function getReplay(replayId: string): Promise<AnalyzeResponse> {
 }
 
 /**
+ * Get turn-by-turn analysis for a replay
+ */
+export async function getTurnAnalysis(replayId: string): Promise<TurnAnalysisResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/showdown/replays/${replayId}/turns`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+  return handleResponse<TurnAnalysisResponse>(response);
+}
+
+export interface TurnAnalysisResponse {
+  status: string;
+  battleId: string;
+  format: string;
+  player1: string;
+  player2: string;
+  winner?: string;
+  turns: TurnDataAPI[];
+  archetypes: ArchetypeInfo;
+}
+
+export interface TurnDataAPI {
+  turnNumber: number;
+  events: BattleEventAPI[];
+  boardState: BoardStateAPI;
+}
+
+export interface BattleEventAPI {
+  type: string;
+  pokemon: string;
+  action: string;
+  target?: string;
+  result?: string;
+  details?: string;
+  playerSide: string;
+}
+
+export interface BoardStateAPI {
+  player1Active: ActivePokemonAPI[];
+  player2Active: ActivePokemonAPI[];
+}
+
+export interface ActivePokemonAPI {
+  species: string;
+  nickname?: string;
+  position: number;
+  hp: number;
+  maxHp: number;
+  status?: string;
+  isLead?: boolean;
+}
+
+export interface ArchetypeInfo {
+  player1: PlayerArchetype;
+  player2: PlayerArchetype;
+}
+
+export interface PlayerArchetype {
+  archetype: string;
+  description: string;
+  tags: string[];
+}
+
+/**
  * Extract replay ID from various Pokémon Showdown URL formats
  */
 function extractReplayId(url: string): string | null {

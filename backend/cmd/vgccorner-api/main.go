@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/dtsong/vgccorner/backend/internal/db"
 	"github.com/dtsong/vgccorner/backend/internal/httpapi"
 	"github.com/dtsong/vgccorner/backend/internal/observability"
 	_ "github.com/lib/pq"
@@ -16,17 +17,20 @@ func main() {
 	// Initialize database connection
 	dbConnString := getDBConnString()
 	logger.Infof("connecting to database at %s", dbConnString)
-	// TODO: Uncomment when db.NewDatabase is ready
-	// db, err := db.NewDatabase(dbConnString)
-	// if err != nil {
-	// 	logger.Fatalf("failed to initialize database: %v", err)
-	// }
-	// defer db.Close()
+	database, err := db.NewDatabase(dbConnString)
+	if err != nil {
+		logger.Fatalf("failed to initialize database: %v", err)
+	}
+	defer func() {
+		if err := database.Close(); err != nil {
+			logger.Errorf("failed to close database: %v", err)
+		}
+	}()
 
 	addr := getAddr()
 	logger.Infof("starting vgccorner-api on %s", addr)
 
-	router := httpapi.NewRouter(logger)
+	router := httpapi.NewRouter(logger, database)
 
 	if err := http.ListenAndServe(addr, router); err != nil {
 		logger.Fatalf("server failed: %v", err)

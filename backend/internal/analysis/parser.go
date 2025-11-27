@@ -214,6 +214,12 @@ func ParseShowdownLog(logContent string) (*BattleSummary, error) {
 	calculateStats(summary)
 	detectTurningPoints(summary)
 
+	// Classify teams
+	summary.Player1.Classification = ClassifyTeam(summary.Player1.Team)
+	summary.Player1.TeamArchetype = summary.Player1.Classification.Archetype
+	summary.Player2.Classification = ClassifyTeam(summary.Player2.Team)
+	summary.Player2.TeamArchetype = summary.Player2.Classification.Archetype
+
 	return summary, nil
 }
 

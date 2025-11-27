@@ -138,9 +138,9 @@ func (s *Server) handleAnalyzeShowdown(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse battle log
+	// Parse battle log with enhanced turn tracking
 	parseStart := time.Now()
-	battleSummary, err = analysis.ParseShowdownLog(battlelLog)
+	battleSummary, err = analysis.ParseEnhancedShowdownLog(battlelLog)
 	parseTime := time.Since(parseStart).Milliseconds()
 
 	if err != nil {
@@ -153,40 +153,53 @@ func (s *Server) handleAnalyzeShowdown(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Store battle in database
-	battleRecord := &db.Battle{
-		ID:          battleSummary.ID,
-		Format:      battleSummary.Format,
-		Timestamp:   battleSummary.Timestamp,
-		DurationSec: battleSummary.Duration,
-		Winner:      battleSummary.Winner,
-		Player1ID:   battleSummary.Player1.Name,
-		Player2ID:   battleSummary.Player2.Name,
-		BattleLog:   battlelLog,
-		IsPrivate:   req.IsPrivate,
-	}
+	// Store battle in database (if database is configured)
+	battleID := battleSummary.ID
+	if s.db != nil {
+		ctx := r.Context()
+		battleRecord := &db.Battle{
+			ID:          battleSummary.ID,
+			Format:      battleSummary.Format,
+			Timestamp:   battleSummary.Timestamp,
+			DurationSec: battleSummary.Duration,
+			Winner:      battleSummary.Winner,
+			Player1ID:   battleSummary.Player1.Name,
+			Player2ID:   battleSummary.Player2.Name,
+			BattleLog:   battlelLog,
+			IsPrivate:   req.IsPrivate,
+			Analysis:    convertBattleStats(battleSummary),
+			KeyMoments:  convertKeyMoments(battleSummary),
+		}
 
-	// TODO: Store analysis results
-	// TODO: Store key moments
-	// battleID, err := s.db.StoreBattle(ctx, battleRecord)
-	// if err != nil {
-	// 	s.logger.Infof("Failed to store battle: %v", err)
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	json.NewEncoder(w).Encode(ErrorResponse{
-	// 		Error: "Failed to store battle",
-	// 		Code:  "INTERNAL_ERROR",
-	// 	})
-	// 	return
-	// }
+		// Store battle and basic analysis
+		storedID, err := s.db.StoreBattle(ctx, battleRecord)
+		if err != nil {
+			s.logger.Infof("Failed to store battle: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			_ = json.NewEncoder(w).Encode(ErrorResponse{
+				Error: "Failed to store battle",
+				Code:  "INTERNAL_ERROR",
+			})
+			return
+		}
+		battleID = storedID
+
+		// Store detailed turn-by-turn data
+		if err := s.db.StoreTurnData(ctx, battleID, battleSummary); err != nil {
+			s.logger.Infof("Failed to store turn data: %v", err)
+			// Don't fail the request, just log the error
+		}
+	}
 
 	analysisTime := time.Since(start).Milliseconds()
 
-	s.logger.Infof("Successfully analyzed Showdown battle: %s", battleSummary.ID)
+	s.logger.Infof("Successfully analyzed Showdown battle: %s (Player1: %s, Player2: %s)",
+		battleSummary.ID, battleSummary.Player1.TeamArchetype, battleSummary.Player2.TeamArchetype)
 
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(AnalyzeResponse{
 		Status:   "success",
-		BattleID: battleRecord.ID,
+		BattleID: battleID,
 		Data:     battleSummary,
 		Metadata: &ResponseMetadata{
 			ParseTimeMs:    int(parseTime),
@@ -194,6 +207,40 @@ func (s *Server) handleAnalyzeShowdown(w http.ResponseWriter, r *http.Request) {
 			Cached:         false,
 		},
 	})
+}
+
+// convertBattleStats converts analysis stats to database format
+func convertBattleStats(summary *analysis.BattleSummary) *db.BattleAnalysis {
+	return &db.BattleAnalysis{
+		TotalTurns:            summary.Stats.TotalTurns,
+		AvgDamagePerTurn:      summary.Stats.AvgDamagePerTurn,
+		AvgHealPerTurn:        summary.Stats.AvgHealPerTurn,
+		MovesUsedCount:        summary.Stats.Player1Stats.MoveCount + summary.Stats.Player2Stats.MoveCount,
+		SwitchesCount:         summary.Stats.Player1Stats.SwitchCount + summary.Stats.Player2Stats.SwitchCount,
+		SuperEffectiveMoves:   summary.Stats.SuperEffective,
+		NotVeryEffectiveMoves: summary.Stats.NotVeryEffective,
+		CriticalHits:          summary.Stats.CriticalHits,
+		Player1DamageDealt:    summary.Stats.Player1Stats.DamageDealt,
+		Player1DamageTaken:    summary.Stats.Player1Stats.DamageTaken,
+		Player1HealingDone:    summary.Stats.Player1Stats.HealingDone,
+		Player2DamageDealt:    summary.Stats.Player2Stats.DamageDealt,
+		Player2DamageTaken:    summary.Stats.Player2Stats.DamageTaken,
+		Player2HealingDone:    summary.Stats.Player2Stats.HealingDone,
+	}
+}
+
+// convertKeyMoments converts key moments to database format
+func convertKeyMoments(summary *analysis.BattleSummary) []*db.KeyMoment {
+	moments := make([]*db.KeyMoment, 0, len(summary.KeyMoments))
+	for _, km := range summary.KeyMoments {
+		moments = append(moments, &db.KeyMoment{
+			TurnNumber:   km.TurnNumber,
+			MomentType:   km.Type,
+			Description:  km.Description,
+			Significance: km.Significance,
+		})
+	}
+	return moments
 }
 
 // handleGetShowdownReplay handles GET /api/showdown/replays/{replayId} requests.
@@ -212,31 +259,54 @@ func (s *Server) handleGetShowdownReplay(w http.ResponseWriter, r *http.Request)
 
 	s.logger.Infof("Retrieving replay: %s", battleID)
 
-	// TODO: Retrieve from database
-	// battle, err := s.db.GetBattle(ctx, battleID)
-	// if err != nil {
-	// 	s.logger.Infof("Failed to retrieve battle: %v", err)
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	json.NewEncoder(w).Encode(ErrorResponse{
-	// 		Error: "Internal server error",
-	// 		Code:  "INTERNAL_ERROR",
-	// 	})
-	// 	return
-	// }
-	//
-	// if battle == nil {
-	// 	w.WriteHeader(http.StatusNotFound)
-	// 	json.NewEncoder(w).Encode(ErrorResponse{
-	// 		Error: "Replay not found",
-	// 		Code:  "NOT_FOUND",
-	// 	})
-	// 	return
-	// }
+	// Database required for this endpoint
+	if s.db == nil {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		_ = json.NewEncoder(w).Encode(ErrorResponse{
+			Error: "Database not configured",
+			Code:  "SERVICE_UNAVAILABLE",
+		})
+		return
+	}
 
-	w.WriteHeader(http.StatusNotFound)
-	_ = json.NewEncoder(w).Encode(ErrorResponse{
-		Error: "Replay not found",
-		Code:  "NOT_FOUND",
+	ctx := r.Context()
+	battle, err := s.db.GetBattle(ctx, battleID)
+	if err != nil {
+		s.logger.Infof("Failed to retrieve battle: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(ErrorResponse{
+			Error: "Internal server error",
+			Code:  "INTERNAL_ERROR",
+		})
+		return
+	}
+
+	if battle == nil {
+		w.WriteHeader(http.StatusNotFound)
+		_ = json.NewEncoder(w).Encode(ErrorResponse{
+			Error: "Replay not found",
+			Code:  "NOT_FOUND",
+		})
+		return
+	}
+
+	// Parse the battle log to get full summary
+	summary, err := analysis.ParseEnhancedShowdownLog(battle.BattleLog)
+	if err != nil {
+		s.logger.Infof("Failed to parse battle log: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(ErrorResponse{
+			Error: "Failed to parse battle log",
+			Code:  "PARSE_ERROR",
+		})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(AnalyzeResponse{
+		Status:   "success",
+		BattleID: battle.ID,
+		Data:     summary,
 	})
 }
 
@@ -273,30 +343,45 @@ func (s *Server) handleListShowdownReplays(w http.ResponseWriter, r *http.Reques
 
 	s.logger.Infof("Listing replays: username=%s format=%s isPrivate=%v limit=%d offset=%d", username, format, isPrivate, limit, offset)
 
-	// TODO: Query database
-	// filter := &db.BattleFilter{
-	// 	Format:    format,
-	// 	IsPrivate: isPrivate,
-	// }
-	// battles, total, err := s.db.ListBattles(ctx, filter, limit, offset)
-	// if err != nil {
-	// 	s.logger.Infof("Failed to list battles: %v", err)
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	json.NewEncoder(w).Encode(ErrorResponse{
-	// 		Error: "Internal server error",
-	// 		Code:  "INTERNAL_ERROR",
-	// 	})
-	// 	return
-	// }
+	// Database required for this endpoint
+	if s.db == nil {
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"status": "success",
+			"data":   []interface{}{},
+			"pagination": map[string]int{
+				"limit":  limit,
+				"offset": offset,
+				"total":  0,
+			},
+		})
+		return
+	}
+
+	ctx := r.Context()
+	filter := &db.BattleFilter{
+		Format:    format,
+		IsPrivate: isPrivate,
+	}
+	battles, total, err := s.db.ListBattles(ctx, filter, limit, offset)
+	if err != nil {
+		s.logger.Infof("Failed to list battles: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(ErrorResponse{
+			Error: "Internal server error",
+			Code:  "INTERNAL_ERROR",
+		})
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(map[string]interface{}{
 		"status": "success",
-		"data":   []interface{}{},
+		"data":   battles,
 		"pagination": map[string]int{
 			"limit":  limit,
 			"offset": offset,
-			"total":  0,
+			"total":  total,
 		},
 	})
 }

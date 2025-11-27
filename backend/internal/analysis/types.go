@@ -27,12 +27,14 @@ type BattleSummary struct {
 
 // Player represents a single player in the battle.
 type Player struct {
-	Name        string    `json:"name"`
-	Team        []Pokémon `json:"team"`
-	Active      *Pokémon  `json:"active"`      // Currently active Pokémon
-	Losses      int       `json:"losses"`      // Number of fainted Pokémon
-	TotalLeft   int       `json:"totalLeft"`   // Total Pokémon still in battle
-	ActiveIndex int       `json:"activeIndex"` // Index in team of active Pokémon
+	Name           string             `json:"name"`
+	Team           []Pokémon          `json:"team"`
+	Active         *Pokémon           `json:"active"`         // Currently active Pokémon
+	Losses         int                `json:"losses"`         // Number of fainted Pokémon
+	TotalLeft      int                `json:"totalLeft"`      // Total Pokémon still in battle
+	ActiveIndex    int                `json:"activeIndex"`    // Index in team of active Pokémon
+	TeamArchetype  string             `json:"teamArchetype"`  // e.g., "Hard Trick Room", "Tailwind Hyper Offense"
+	Classification TeamClassification `json:"classification"` // Detailed team classification
 }
 
 // Pokémon represents a single Pokémon with its stats and moves.
@@ -92,11 +94,17 @@ type PositionScore struct {
 
 // Action represents an action taken by a player during a turn.
 type Action struct {
-	Player     string `json:"player"`     // "player1" or "player2"
-	ActionType string `json:"actionType"` // "move", "switch", "item"
-	Move       *Move  `json:"move,omitempty"`
-	SwitchTo   string `json:"switchTo,omitempty"` // Pokémon name if switch
-	Item       string `json:"item,omitempty"`     // Item used if item action
+	Player      string      `json:"player"`     // "player1" or "player2"
+	ActionType  string      `json:"actionType"` // "move", "switch", "item"
+	Pokemon     string      `json:"pokemon"`    // Pokémon performing the action
+	Move        *Move       `json:"move,omitempty"`
+	SwitchTo    string      `json:"switchTo,omitempty"` // Pokémon name if switch
+	Item        string      `json:"item,omitempty"`     // Item used if item action
+	Target      string      `json:"target,omitempty"`   // Target of the action
+	Result      string      `json:"result,omitempty"`   // "critical-hit", "super-effective", etc.
+	Details     string      `json:"details,omitempty"`  // Additional details
+	Impact      *MoveImpact `json:"impact,omitempty"`   // Detailed impact of the action
+	OrderInTurn int         `json:"orderInTurn"`        // Order within the turn (0-based)
 }
 
 // BattleState represents the state of the battle at a point in time.
@@ -160,4 +168,46 @@ type KeyMoment struct {
 	Description  string `json:"description"`  // e.g., "Player 2 switched to Charizard"
 	Type         string `json:"type"`         // "switch", "kO", "status", "weather", etc.
 	Significance int    `json:"significance"` // 1-10 scale
+}
+
+// TeamClassification contains detailed information about a team's archetype
+type TeamClassification struct {
+	Archetype        string   `json:"archetype"`        // Primary archetype
+	HasTrickRoom     bool     `json:"hasTrickRoom"`     // Has Trick Room
+	TrickRoomUsers   []string `json:"trickRoomUsers"`   // Pokémon with Trick Room
+	HasTailwind      bool     `json:"hasTailwind"`      // Has Tailwind
+	TailwindUsers    []string `json:"tailwindUsers"`    // Pokémon with Tailwind
+	HasWeatherSetter bool     `json:"hasWeatherSetter"` // Has weather-setting ability/move
+	WeatherType      string   `json:"weatherType"`      // "sun", "rain", "sand", "snow", etc.
+	WeatherSetters   []string `json:"weatherSetters"`   // Pokémon that set weather
+	HasPsyTerrain    bool     `json:"hasPsyTerrain"`    // Has Psychic Terrain
+	PsyTerrainUsers  []string `json:"psyTerrainUsers"`  // Pokémon with Psychic Terrain
+	HasBalanceBros   bool     `json:"hasBalanceBros"`   // Has Incineroar + Rillaboom
+	HasChoiceItems   bool     `json:"hasChoiceItems"`   // Has Choice Specs/Band/Scarf
+	ChoiceUsers      []string `json:"choiceUsers"`      // Pokémon with Choice items
+	Tags             []string `json:"tags"`             // Additional descriptive tags
+}
+
+// MoveImpact represents the detailed impact of a move or action
+type MoveImpact struct {
+	DamageDealt     int          `json:"damageDealt"`     // Damage dealt to opponent
+	HealingDone     int          `json:"healingDone"`     // Healing done
+	StatusInflicted string       `json:"statusInflicted"` // Status condition inflicted
+	SpeedControl    string       `json:"speedControl"`    // "trick-room", "tailwind", "paralysis", etc.
+	WeatherSet      string       `json:"weatherSet"`      // Weather set by this move
+	TerrainSet      string       `json:"terrainSet"`      // Terrain set by this move
+	FakeOut         bool         `json:"fakeOut"`         // Was this a Fake Out?
+	Protect         bool         `json:"protect"`         // Was this a Protect/Detect?
+	StatChanges     []StatChange `json:"statChanges"`     // Stat changes caused
+	Fainted         []string     `json:"fainted"`         // List of Pokémon that fainted
+	Critical        bool         `json:"critical"`        // Was this a critical hit?
+	Effectiveness   string       `json:"effectiveness"`   // "super-effective", "not-very-effective", "immune"
+	Missed          bool         `json:"missed"`          // Did the move miss?
+}
+
+// StatChange represents a stat modification
+type StatChange struct {
+	Pokemon string `json:"pokemon"` // Pokémon affected
+	Stat    string `json:"stat"`    // "attack", "defense", "speed", etc.
+	Stages  int    `json:"stages"`  // Positive for boost, negative for drop
 }
